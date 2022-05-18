@@ -1,4 +1,3 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,27 +10,47 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
+import { FC, MouseEvent, useContext, useState } from "react";
+import { theme } from "../../shared/theme";
+import { NavLink, useNavigate } from "react-router-dom";
+import { AppContext } from "../../shared/Context";
 
 const pages = ["Список страниц"];
 const settings = ["профиль", "аккаунт", "выйти"];
 
-export const Header = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null
-  );
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
+export const Header: FC = () => {
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
+  const { isLoggedIn, setIsLoggedIn } = useContext(AppContext);
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handleMenuItemClick = (
+    e: MouseEvent<HTMLLIElement>,
+    setting: string
+  ) => {
+    switch (setting) {
+      case settings[2]:
+        sessionStorage.setItem("isLoggedIn", "false");
+        localStorage.clear();
+        navigate("/login");
+        setIsLoggedIn(false);
+        break;
+
+      default:
+        break;
+    }
+    setAnchorElUser(null);
   };
 
   const handleCloseUserMenu = () => {
@@ -43,10 +62,14 @@ export const Header = () => {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography
-            variant="h6"
+            component={NavLink}
+            to="/"
             noWrap
-            component="div"
-            sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
+            color={theme.palette.primary.contrastText}
+            sx={{
+              mr: 2,
+              display: { xs: "none", md: "flex", textDecoration: "none" },
+            }}
           >
             LOGO
           </Typography>
@@ -100,7 +123,11 @@ export const Header = () => {
               <Button
                 key={page}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "white", display: "block" }}
+                sx={{
+                  my: 2,
+                  color: `${theme.palette.primary.contrastText}`,
+                  display: "block",
+                }}
               >
                 {page}
               </Button>
@@ -110,7 +137,7 @@ export const Header = () => {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="настройки">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Remy Sharp">P</Avatar>
               </IconButton>
             </Tooltip>
             <Menu
@@ -130,7 +157,10 @@ export const Header = () => {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem
+                  key={setting}
+                  onClick={(e) => handleMenuItemClick(e, setting)}
+                >
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
               ))}
